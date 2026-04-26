@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>180DC ESCP Executive Dashboard | Fall 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --g900:  #1a3d18;
+    --g800:  #245220;
+    --g700:  #2d6b29;
+    --g600:  #3a8432;
+    --g500:  #4aa042;
+    --g400:  #6bbf63;
+    --g300:  #95d490;
+    --g100:  #e8f5e6;
+    --g050:  #f2f8f1;
+    --amber: #c98a0a;
+    --red:   #c0392b;
+    --surface: var(--g050);
+    --card:    #ffffff;
+    --border:  #cde3cb;
+    --text:    #1a2e19;
+    --muted:   #5a7558;
+    --light:   var(--g100);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Calibri', 'Gill Sans MT', 'Gill Sans', 'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--g900) 0%, var(--g700) 100%);
+    color: #fff;
+    padding: 26px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(26,61,24,0.35);
+  }
+  .header-left h1 {
+    font-size: 1.55rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .header-left h1 span { color: var(--g300); }
+  .header-left p { font-size: 0.82rem; color: #a8c9a5; margin-top: 4px; letter-spacing: 0.1px; }
+  .header-badge {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 0.78rem;
+    color: #b8d4b5;
+    text-align: right;
+  }
+  .header-badge strong { display: block; font-size: 0.95rem; color: #fff; margin-bottom: 2px; font-weight: 700; }
+
+  /* ── NAV TABS ── */
+  nav {
+    background: var(--card);
+    border-bottom: 2px solid var(--border);
+    padding: 0 40px;
+    display: flex;
+    gap: 2px;
+    position: sticky;
+    top: 79px;
+    z-index: 90;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .tab {
+    padding: 13px 22px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all .18s ease;
+    white-space: nowrap;
+    user-select: none;
+    letter-spacing: 0.1px;
+  }
+  .tab:hover { color: var(--g700); }
+  .tab.active { color: var(--g700); border-bottom-color: var(--g600); }
+
+  /* ── MAIN ── */
+  main { padding: 30px 40px 60px; max-width: 1400px; margin: 0 auto; }
+
+  .section { display: none; animation: fadeIn .3s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--g800);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 20px 22px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 10px rgba(26,61,24,0.06);
+    transition: transform .2s, box-shadow .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    border-radius: 10px 10px 0 0;
+  }
+  .kpi-card.g1::before { background: var(--g900); }
+  .kpi-card.g2::before { background: var(--g700); }
+  .kpi-card.g3::before { background: var(--g500); }
+  .kpi-card.g4::before { background: var(--g400); }
+  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,61,24,0.12); }
+  .kpi-label { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+  .kpi-value { font-size: 1.85rem; font-weight: 700; color: var(--g800); line-height: 1.1; margin-bottom: 5px; }
+  .kpi-sub { font-size: 0.75rem; color: var(--muted); }
+  .kpi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.69rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 4px;
+    margin-top: 9px;
+    letter-spacing: 0.1px;
+  }
+  .kpi-badge.on-track { background: #d4edda; color: #1a4d22; }
+  .kpi-badge.warning  { background: #fef3c7; color: #7c4a00; }
+  .kpi-badge.risk     { background: #fde8e6; color: #7d1a14; }
+
+  /* ── CHART GRID ── */
+  .chart-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 22px;
+  }
+  .chart-card {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 22px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 10px rgba(26,61,24,0.05);
+  }
+  .chart-card.full { grid-column: 1 / -1; }
+  .chart-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--g800);
+    margin-bottom: 4px;
+    letter-spacing: 0.1px;
+  }
+  .chart-subtitle { font-size: 0.74rem; color: var(--muted); margin-bottom: 16px; }
+  .chart-wrap { position: relative; }
+
+  /* ── TABLE ── */
+  .table-card {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 22px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 10px rgba(26,61,24,0.05);
+    overflow: hidden;
+    margin-bottom: 22px;
+  }
+  .table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .filter-group { display: flex; gap: 7px; flex-wrap: wrap; }
+  .filter-btn {
+    padding: 5px 13px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--light);
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .filter-btn.active, .filter-btn:hover { background: var(--g700); color: #fff; border-color: var(--g700); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  thead tr { background: var(--g050); }
+  th {
+    padding: 10px 13px;
+    text-align: left;
+    font-size: 0.71rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 10px 13px;
+    border-bottom: 1px solid #f0f7ef;
+    color: var(--text);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--g050); }
+  .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 4px;
+    font-size: 0.69rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .badge-low    { background: #d4edda; color: #1a4d22; }
+  .badge-medium { background: #fef3c7; color: #7c4a00; }
+  .badge-high   { background: #fde8e6; color: #7d1a14; }
+  .badge-signed      { background: #d4edda; color: #1a4d22; }
+  .badge-active      { background: #e8f5e6; color: var(--g700); }
+  .badge-negotiation { background: #fef3c7; color: #7c4a00; }
+  .badge-pending     { background: #f0f0f0; color: #4a4a4a; }
+
+  /* ── INSIGHT CARDS ── */
+  .insight-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .insight-card {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 18px 20px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--g600);
+    box-shadow: 0 2px 8px rgba(26,61,24,0.05);
+  }
+  .insight-card.risk { border-left-color: var(--red); }
+  .insight-card.opp  { border-left-color: var(--g400); }
+  .insight-card.warn { border-left-color: var(--amber); }
+  .insight-label {
+    font-size: 0.69rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+    margin-bottom: 7px;
+  }
+  .insight-text { font-size: 0.82rem; color: var(--text); line-height: 1.55; }
+
+  /* ── MONTHLY CARDS ── */
+  .monthly-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .month-card {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(26,61,24,0.05);
+  }
+  .month-name { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .month-rev  { font-size: 1.35rem; font-weight: 700; color: var(--g700); margin-bottom: 4px; }
+  .month-cost { font-size: 0.86rem; color: var(--red); font-weight: 600; margin-bottom: 7px; }
+  .month-net  { font-size: 0.9rem; font-weight: 700; padding: 3px 12px; border-radius: 4px; display: inline-block; }
+  .month-net.pos { background: #d4edda; color: #1a4d22; }
+  .month-net.neg { background: #fde8e6; color: #7d1a14; }
+
+  /* ── ASSUMPTIONS ── */
+  .assumption-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-bottom: 22px;
+  }
+  .assumption-section {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(26,61,24,0.05);
+  }
+  .assumption-section h3 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--g700);
+    margin-bottom: 13px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .assumption-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--g050);
+    font-size: 0.81rem;
+    gap: 14px;
+  }
+  .assumption-row:last-child { border-bottom: none; }
+  .assumption-param { color: var(--text); flex: 1; }
+  .assumption-val { font-weight: 700; color: var(--g800); white-space: nowrap; }
+  .assumption-note { font-size: 0.69rem; color: var(--muted); margin-top: 2px; }
+
+  /* ── PROGRESS BARS ── */
+  .progress-bar-wrap { margin-bottom: 15px; }
+  .progress-header { display: flex; justify-content: space-between; font-size: 0.79rem; margin-bottom: 5px; }
+  .progress-label { font-weight: 600; color: var(--text); }
+  .progress-val { font-weight: 700; color: var(--g700); }
+  .progress-track { background: var(--light); border-radius: 6px; height: 9px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 6px; transition: width 1.2s cubic-bezier(.4,0,.2,1); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .chart-grid-2 { grid-template-columns: 1fr; }
+    .insight-grid { grid-template-columns: 1fr; }
+    .assumption-grid { grid-template-columns: 1fr; }
+    .monthly-summary { grid-template-columns: repeat(2, 1fr); }
+    main { padding: 18px; }
+    nav { padding: 0 18px; }
+    header { padding: 18px; flex-direction: column; gap: 10px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>180DC <span>ESCP</span> Executive Dashboard</h1>
+    <p>Fall Semester 2026 &nbsp;|&nbsp; September – December 2026 &nbsp;|&nbsp; All amounts in EUR &nbsp;|&nbsp; Prepared by: Yanis Taimi &nbsp;·&nbsp; April 2026</p>
+  </div>
+  <div class="header-badge">
+    <strong>Live Financial Model</strong>
+    Head of Finance &amp; Legal Case Study
+  </div>
+</header>
+
+<nav>
+  <div class="tab active" onclick="showSection('overview')">Overview</div>
+  <div class="tab" onclick="showSection('financials')">Monthly Financials</div>
+  <div class="tab" onclick="showSection('kpis')">KPIs</div>
+  <div class="tab" onclick="showSection('legal')">Legal Tracker</div>
+  <div class="tab" onclick="showSection('assumptions')">Assumptions</div>
+</nav>
+
+<main>
+
+  <!-- ════════════════════ OVERVIEW ════════════════════ -->
+  <div class="section active" id="section-overview">
+
+    <div class="section-title">Financial Snapshot</div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card g1">
+        <div class="kpi-label">Total Revenue</div>
+        <div class="kpi-value">€18,930</div>
+        <div class="kpi-sub">Sep – Dec 2026</div>
+        <div class="kpi-badge on-track">On Track &nbsp;·&nbsp; Target &ge; €15,000</div>
+      </div>
+      <div class="kpi-card g2">
+        <div class="kpi-label">Total Costs</div>
+        <div class="kpi-value">€4,730</div>
+        <div class="kpi-sub">All categories combined</div>
+        <div class="kpi-badge on-track">On Track &nbsp;·&nbsp; Target &le; €7,000</div>
+      </div>
+      <div class="kpi-card g3">
+        <div class="kpi-label">Net Surplus</div>
+        <div class="kpi-value">€14,200</div>
+        <div class="kpi-sub">Revenue minus Costs</div>
+        <div class="kpi-badge on-track">On Track &nbsp;·&nbsp; Target &gt; €8,000</div>
+      </div>
+      <div class="kpi-card g4">
+        <div class="kpi-label">Net Margin</div>
+        <div class="kpi-value">75.0%</div>
+        <div class="kpi-sub">Net Surplus &divide; Revenue</div>
+        <div class="kpi-badge on-track">On Track &nbsp;·&nbsp; Target &ge; 50%</div>
+      </div>
+    </div>
+
+    <div class="chart-grid-2">
+      <div class="chart-card">
+        <div class="chart-title">Revenue by Stream</div>
+        <div class="chart-subtitle">Full semester breakdown total €18,930</div>
+        <div class="chart-wrap" style="height:260px">
+          <canvas id="revDonut"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Cost Breakdown</div>
+        <div class="chart-subtitle">Full semester breakdown total €4,730</div>
+        <div class="chart-wrap" style="height:260px">
+          <canvas id="costDonut"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card full" style="margin-bottom:22px">
+      <div class="chart-title">Monthly Revenue vs Costs with Net Balance</div>
+      <div class="chart-subtitle">Sep to Dec 2026 &nbsp;·&nbsp; Bars = Revenue / Cost &nbsp;|&nbsp; Line = Net Balance</div>
+      <div class="chart-wrap" style="height:290px">
+        <canvas id="monthlyBar"></canvas>
+      </div>
+    </div>
+
+    <div class="section-title">Key Insights</div>
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-label">Revenue Mix</div>
+        <div class="insight-text">Premium projects (€8k) + Standard projects (€7k) = €15k in project revenue. October is the peak revenue month at €7,500.</div>
+      </div>
+      <div class="insight-card warn">
+        <div class="insight-label">Cost Structure</div>
+        <div class="insight-text">Event costs (kick-off, networking, gala) represent the largest single cost block. Operations are lean and spread evenly at €245/month.</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-label">Legal Position</div>
+        <div class="insight-text">6 paid contracts to review per semester. Insurance secured in September. Compliance filing due in December.</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-label">Cash Flow</div>
+        <div class="insight-text">Positive net balance expected in Sep, Oct and Nov. Largest inflow in October 1 premium + 2 standard projects closing simultaneously.</div>
+      </div>
+      <div class="insight-card risk">
+        <div class="insight-label">Risk Flags</div>
+        <div class="insight-text">Sponsorship base is small (3 sponsors). Revenue concentrated in Oct–Nov. Pro-bono projects offer no direct financial return.</div>
+      </div>
+      <div class="insight-card opp">
+        <div class="insight-label">Opportunities</div>
+        <div class="insight-text">Closing the €5k premium deal would lift revenue by €1k (+5.2%). Growing the sponsor base from 3 to 5 is the key commercial lever.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════ FINANCIALS ════════════════════ -->
+  <div class="section" id="section-financials">
+
+    <div class="section-title">Monthly Financial Summary</div>
+
+    <div class="monthly-summary">
+      <div class="month-card">
+        <div class="month-name">September</div>
+        <div class="month-rev">€4,880</div>
+        <div class="month-cost">Cost: €1,545</div>
+        <div class="month-net pos">Net +€3,335</div>
+      </div>
+      <div class="month-card">
+        <div class="month-name">October</div>
+        <div class="month-rev">€7,500</div>
+        <div class="month-cost">Cost: €845</div>
+        <div class="month-net pos">Net +€6,655</div>
+      </div>
+      <div class="month-card">
+        <div class="month-name">November</div>
+        <div class="month-rev">€6,550</div>
+        <div class="month-cost">Cost: €1,245</div>
+        <div class="month-net pos">Net +€5,305</div>
+      </div>
+      <div class="month-card">
+        <div class="month-name">December</div>
+        <div class="month-rev">€0</div>
+        <div class="month-cost">Cost: €1,095</div>
+        <div class="month-net neg">Net (€1,095)</div>
+      </div>
+    </div>
+
+    <div class="chart-card full" style="margin-bottom:22px">
+      <div class="chart-title">Cumulative Balance Semester Progression</div>
+      <div class="chart-subtitle">Running total from Sep to Dec 2026 &nbsp;·&nbsp; Peak at end of November</div>
+      <div class="chart-wrap" style="height:270px">
+        <canvas id="cumulativeLine"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-grid-2">
+      <div class="chart-card">
+        <div class="chart-title">Monthly Revenue by Stream</div>
+        <div class="chart-subtitle">Stacked by revenue category</div>
+        <div class="chart-wrap" style="height:270px">
+          <canvas id="revStackedBar"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Monthly Cost by Category</div>
+        <div class="chart-subtitle">Stacked by cost category</div>
+        <div class="chart-wrap" style="height:270px">
+          <canvas id="costStackedBar"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <div>
+          <div class="chart-title">Detailed Monthly P&amp;L</div>
+          <div class="chart-subtitle">All line items, Sep to Dec 2026</div>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table id="plTable">
+          <thead>
+            <tr>
+              <th>Line Item</th>
+              <th>Sep-26</th>
+              <th>Oct-26</th>
+              <th>Nov-26</th>
+              <th>Dec-26</th>
+              <th>Total</th>
+              <th>% of Total Rev</th>
+            </tr>
+          </thead>
+          <tbody id="plBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════ KPIs ════════════════════ -->
+  <div class="section" id="section-kpis">
+
+    <div class="section-title">Financial Performance KPIs</div>
+
+    <div class="kpi-grid" style="grid-template-columns: repeat(3,1fr)">
+      <div class="kpi-card g1">
+        <div class="kpi-label">1. Total Semester Revenue</div>
+        <div class="kpi-value">€18,930</div>
+        <div class="kpi-sub">Sum of all revenue streams</div>
+        <div class="kpi-badge on-track">On Track &nbsp;·&nbsp; Target &ge; €15,000</div>
+      </div>
+      <div class="kpi-card g2">
+        <div class="kpi-label">2. Total Semester Costs</div>
+        <div class="kpi-value">€4,730</div>
+        <div class="kpi-sub">Events + Ops + Delivery + Legal</div>
+        <div class="kpi-badge on-track">On Track &nbsp;·&nbsp; Target &le; €7,000</div>
+      </div>
+      <div class="kpi-card g3">
+        <div class="kpi-label">3. Net Surplus</div>
+        <div class="kpi-value">€14,200</div>
+        <div class="kpi-sub">Revenue minus Total Costs</div>
+        <div class="kpi-badge on-track">On Track &nbsp;·&nbsp; Target &gt; €8,000</div>
+      </div>
+      <div class="kpi-card g4">
+        <div class="kpi-label">4. Net Margin</div>
+        <div class="kpi-value">75.0%</div>
+        <div class="kpi-sub">Net Surplus &divide; Total Revenue</div>
+        <div class="kpi-badge on-track">On Track &nbsp;·&nbsp; Target &ge; 50%</div>
+      </div>
+      <div class="kpi-card g1">
+        <div class="kpi-label">5. Revenue per Paid Project</div>
+        <div class="kpi-value">€2,500</div>
+        <div class="kpi-sub">Across 6 paid engagements</div>
+        <div class="kpi-badge on-track">On Track &nbsp;·&nbsp; Target &ge; €2,000</div>
+      </div>
+      <div class="kpi-card g2">
+        <div class="kpi-label">6. Project Conversion Rate</div>
+        <div class="kpi-value">75%</div>
+        <div class="kpi-sub">6 paid &divide; 8 total projects</div>
+        <div class="kpi-badge on-track">On Track &nbsp;·&nbsp; Target &ge; 70%</div>
+      </div>
+    </div>
+
+    <div class="section-title">Operational Efficiency KPIs</div>
+
+    <div class="chart-grid-2">
+      <div class="chart-card">
+        <div class="chart-title">KPI Performance vs Target</div>
+        <div class="chart-subtitle">Normalised scores (100 = hitting target exactly)</div>
+        <div class="chart-wrap" style="height:300px">
+          <canvas id="kpiRadar"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div style="margin-bottom:14px">
+          <div class="chart-title">Operational KPIs Progress</div>
+          <div class="chart-subtitle">Actual vs benchmark thresholds</div>
+        </div>
+
+        <div class="progress-bar-wrap">
+          <div class="progress-header">
+            <span class="progress-label">7. Avg. Project Value (Paid)</span>
+            <span class="progress-val">€2,500 &nbsp;/&nbsp; Target: trend upward</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:83%;background:var(--g700)"></div></div>
+        </div>
+
+        <div class="progress-bar-wrap">
+          <div class="progress-header">
+            <span class="progress-label">8. Cost per Member</span>
+            <span class="progress-val">€55.65 &nbsp;/&nbsp; Target &le; €80</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:70%;background:var(--g600)"></div></div>
+        </div>
+
+        <div class="progress-bar-wrap">
+          <div class="progress-header">
+            <span class="progress-label">9. Sponsorship Coverage Ratio</span>
+            <span class="progress-val">50.7% &nbsp;/&nbsp; Target &ge; 30%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:100%;background:var(--g500)"></div></div>
+        </div>
+
+        <div class="progress-bar-wrap">
+          <div class="progress-header">
+            <span class="progress-label">10. Legal &amp; Compliance Cost Ratio</span>
+            <span class="progress-val">3.2% &nbsp;/&nbsp; Target &le; 5%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:64%;background:var(--g400)"></div></div>
+        </div>
+
+        <div style="background:var(--g050);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:10px">
+          <div style="font-size:0.76rem;font-weight:700;color:var(--g800);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">KPI Summary</div>
+          <div style="font-size:0.81rem;color:var(--muted);line-height:1.6">
+            All 10 KPIs are currently <strong style="color:var(--g700)">On Track</strong>. Net margin of 75% exceeds the 50% target by 25pp, indicating a healthy, well-managed operation with significant financial headroom.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════ LEGAL ════════════════════ -->
+  <div class="section" id="section-legal">
+
+    <div class="section-title">Legal &amp; Contract Tracker</div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card g1">
+        <div class="kpi-label">Total Contracts</div>
+        <div class="kpi-value">14</div>
+        <div class="kpi-sub">Projects + Sponsorships + Compliance</div>
+      </div>
+      <div class="kpi-card g2">
+        <div class="kpi-label">Total Contract Value</div>
+        <div class="kpi-value">€19,950</div>
+        <div class="kpi-sub">Across all active agreements</div>
+      </div>
+      <div class="kpi-card g3">
+        <div class="kpi-label">High Risk Contracts</div>
+        <div class="kpi-value">1</div>
+        <div class="kpi-sub">PRJ-002 Finalise terms by 10/09</div>
+        <div class="kpi-badge warning">Needs Attention</div>
+      </div>
+      <div class="kpi-card g4">
+        <div class="kpi-label">Medium Risk Contracts</div>
+        <div class="kpi-value">3</div>
+        <div class="kpi-sub">PRJ-006, SPO-002, LEG-001</div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <div>
+          <div class="chart-title">Full Contract Register</div>
+          <div class="chart-subtitle">All active engagements, sponsorships and compliance obligations</div>
+        </div>
+        <div class="filter-group">
+          <button class="filter-btn active" onclick="filterLegal('all', this)">All</button>
+          <button class="filter-btn" onclick="filterLegal('Consulting Project', this)">Projects</button>
+          <button class="filter-btn" onclick="filterLegal('Sponsorship Agmt', this)">Sponsorships</button>
+          <button class="filter-btn" onclick="filterLegal('Pro Bono', this)">Pro Bono</button>
+          <button class="filter-btn" onclick="filterLegal('risk-high', this)">High Risk</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Partner / Client</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Value (EUR)</th>
+              <th>Risk</th>
+              <th>Action Required</th>
+              <th>Owner</th>
+            </tr>
+          </thead>
+          <tbody id="legalBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="chart-grid-2">
+      <div class="chart-card">
+        <div class="chart-title">Contracts by Type</div>
+        <div class="chart-subtitle">Distribution across categories</div>
+        <div class="chart-wrap" style="height:255px">
+          <canvas id="legalTypeChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Contracts by Risk Level</div>
+        <div class="chart-subtitle">Low / Medium / High breakdown</div>
+        <div class="chart-wrap" style="height:255px">
+          <canvas id="legalRiskChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════ ASSUMPTIONS ════════════════════ -->
+  <div class="section" id="section-assumptions">
+
+    <div class="section-title">Model Assumptions Fall Semester 2026</div>
+    <p style="font-size:0.81rem;color:var(--muted);margin-bottom:22px">All assumptions are hardcoded inputs that drive the full financial model. Edit these in the source Excel file to update all calculations.</p>
+
+    <div class="assumption-grid">
+      <div class="assumption-section">
+        <h3>Membership &amp; Team Structure</h3>
+        <div class="assumption-row"><div><div class="assumption-param">Total Members</div><div class="assumption-note">Based on 80+ stated in case study; 85 used for modelling</div></div><div class="assumption-val">85</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Active / Consulting Members</div><div class="assumption-note">Approx. 70% of total members engaged on live projects</div></div><div class="assumption-val">60</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Senior Members / Team Leads</div><div class="assumption-note">Approx. 20% of active members in leadership roles</div></div><div class="assumption-val">12</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Projects per Semester</div><div class="assumption-note">Per case study reference (180DC ESCP benchmark)</div></div><div class="assumption-val">8</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Pro Bono Projects</div><div class="assumption-note">Impact-driven; no financial compensation</div></div><div class="assumption-val">2</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Standard Paid Projects (€500–3,000)</div><div class="assumption-note">Core revenue-generating engagements</div></div><div class="assumption-val">4</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Premium Paid Projects (€3,000–5,000)</div><div class="assumption-note">Higher-value, larger-scope mandates</div></div><div class="assumption-val">2</div></div>
+      </div>
+
+      <div class="assumption-section">
+        <h3>Revenue Assumptions</h3>
+        <div class="assumption-row"><div><div class="assumption-param">Avg. Revenue Standard Project</div><div class="assumption-note">Mid-point of €500–3,000 range; conservative estimate</div></div><div class="assumption-val">€1,750</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Avg. Revenue Premium Project</div><div class="assumption-note">Mid-point of €3,000–5,000 range; one deal at €5k in negotiation</div></div><div class="assumption-val">€4,000</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Number of Sponsors (Semester)</div><div class="assumption-note">Mix of corporate partners and alumni sponsors</div></div><div class="assumption-val">3</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Avg. Sponsorship Value</div><div class="assumption-note">Conservative; typical range €500–1,500 per sponsor</div></div><div class="assumption-val">€800</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Annual Membership Fee / Member</div><div class="assumption-note">Common rate for student consulting associations at top schools</div></div><div class="assumption-val">€40</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Collection Rate</div><div class="assumption-note">90% assumed; waiver for select pro-bono or founding members</div></div><div class="assumption-val">90%</div></div>
+      </div>
+
+      <div class="assumption-section">
+        <h3>Event Costs</h3>
+        <div class="assumption-row"><div><div class="assumption-param">Kick-off Event (September)</div><div class="assumption-note">Venue, catering and materials for ~85 members; semester launch</div></div><div class="assumption-val">€900</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Mid-Semester Networking Event (Nov)</div><div class="assumption-note">Client and partner-focused event; smaller-scale format</div></div><div class="assumption-val">€600</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">End-of-Semester Gala (December)</div><div class="assumption-note">Annual recognition ceremony; alumni and partner engagement</div></div><div class="assumption-val">€750</div></div>
+      </div>
+
+      <div class="assumption-section">
+        <h3>Operations &amp; Legal Costs</h3>
+        <div class="assumption-row"><div><div class="assumption-param">Marketing and Communication</div><div class="assumption-note">Social media, printed materials, branding assets</div></div><div class="assumption-val">€350</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Software and Digital Tools</div><div class="assumption-note">Notion, Canva Pro, Google Workspace, etc.</div></div><div class="assumption-val">€180</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Administrative and Miscellaneous</div><div class="assumption-note">Printing, postage, stationery, sundry expenses</div></div><div class="assumption-val">€200</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Training and Development</div><div class="assumption-note">Case workshops, speaker sessions, external coaches</div></div><div class="assumption-val">€250</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Avg. Direct Cost per Paid Project</div><div class="assumption-note">Travel, printing, client-meeting expenses per engagement</div></div><div class="assumption-val">€150</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Contract Legal Review (per project)</div><div class="assumption-note">Basic review per engagement; waived for pro-bono projects</div></div><div class="assumption-val">€50</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Liability Insurance (Semester)</div><div class="assumption-note">Covers events, consulting engagements and member activities</div></div><div class="assumption-val">€200</div></div>
+        <div class="assumption-row"><div><div class="assumption-param">Compliance Filing (Semester)</div><div class="assumption-note">Biannual association filings split equally per semester</div></div><div class="assumption-val">€100</div></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── GREEN PALETTE ──
+const G = {
+  g900: '#1a3d18', g800: '#245220', g700: '#2d6b29',
+  g600: '#3a8432', g500: '#4aa042', g400: '#6bbf63',
+  g300: '#95d490', g200: '#bce8b8', g100: '#e8f5e6',
+  amber: '#c98a0a', red: '#c0392b',
+};
+
+// ── TAB NAVIGATION ──
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ── CHART DEFAULTS ──
+Chart.defaults.font.family = "'Calibri', 'Gill Sans MT', 'Trebuchet MS', Arial, sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#5a7558';
+
+const months = ['Sep-26', 'Oct-26', 'Nov-26', 'Dec-26'];
+
+// ── REVENUE DONUT ──
+new Chart(document.getElementById('revDonut'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Premium Projects', 'Standard Projects', 'Sponsorships', 'Membership Fees'],
+    datasets: [{
+      data: [8000, 7000, 2400, 1530],
+      backgroundColor: [G.g900, G.g600, G.g400, G.g300],
+      borderWidth: 3, borderColor: '#fff', hoverOffset: 8,
+    }]
+  },
+  options: {
+    cutout: '65%', responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'right', labels: { padding: 14, boxWidth: 11, usePointStyle: true } },
+      tooltip: { callbacks: { label: ctx => ` €${ctx.parsed.toLocaleString()} (${(ctx.parsed/18930*100).toFixed(1)}%)` } }
+    }
+  }
+});
+
+// ── COST DONUT ──
+new Chart(document.getElementById('costDonut'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Events', 'Project Delivery', 'Operations', 'Legal & Compliance'],
+    datasets: [{
+      data: [2250, 900, 980, 600],
+      backgroundColor: [G.g700, G.g500, G.g300, G.amber],
+      borderWidth: 3, borderColor: '#fff', hoverOffset: 8,
+    }]
+  },
+  options: {
+    cutout: '65%', responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'right', labels: { padding: 14, boxWidth: 11, usePointStyle: true } },
+      tooltip: { callbacks: { label: ctx => ` €${ctx.parsed.toLocaleString()} (${(ctx.parsed/4730*100).toFixed(1)}%)` } }
+    }
+  }
+});
+
+// ── MONTHLY BAR ──
+const rev  = [4880, 7500, 6550, 0];
+const cost = [1545, 845, 1245, 1095];
+const net  = [3335, 6655, 5305, -1095];
+
+new Chart(document.getElementById('monthlyBar'), {
+  type: 'bar',
+  data: {
+    labels: months,
+    datasets: [
+      { label: 'Revenue', data: rev,  backgroundColor: G.g700 + 'cc', borderRadius: 5, order: 2 },
+      { label: 'Costs',   data: cost, backgroundColor: G.amber + 'cc', borderRadius: 5, order: 2 },
+      { label: 'Net Balance', data: net, type: 'line', borderColor: G.g900,
+        backgroundColor: G.g900 + '18', tension: 0.4, pointRadius: 6,
+        pointBackgroundColor: G.g900, fill: true, order: 1, yAxisID: 'y' }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index' },
+    plugins: {
+      legend: { position: 'top' },
+      tooltip: { callbacks: { label: ctx => ` €${(ctx.parsed.y ?? ctx.raw ?? 0).toLocaleString()}` } }
+    },
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: { color: '#edf5ec' }, ticks: { callback: v => '€' + v.toLocaleString() } }
+    }
+  }
+});
+
+// ── CUMULATIVE LINE ──
+new Chart(document.getElementById('cumulativeLine'), {
+  type: 'line',
+  data: {
+    labels: months,
+    datasets: [{
+      label: 'Cumulative Balance',
+      data: [3335, 9990, 15295, 14200],
+      borderColor: G.g700,
+      backgroundColor: G.g700 + '20',
+      tension: 0.4,
+      pointRadius: 7,
+      pointBackgroundColor: G.g700,
+      fill: true, borderWidth: 3,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` €${ctx.parsed.y.toLocaleString()}` } }
+    },
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: { color: '#edf5ec' }, ticks: { callback: v => '€' + v.toLocaleString() } }
+    }
+  }
+});
+
+// ── REV STACKED BAR ──
+new Chart(document.getElementById('revStackedBar'), {
+  type: 'bar',
+  data: {
+    labels: months,
+    datasets: [
+      { label: 'Membership Fees',   data: [1530,0,0,0],       backgroundColor: G.g300 },
+      { label: 'Standard Projects', data: [1750,3500,1750,0], backgroundColor: G.g500 },
+      { label: 'Premium Projects',  data: [0,4000,4000,0],    backgroundColor: G.g800 },
+      { label: 'Sponsorships',      data: [1600,0,800,0],     backgroundColor: G.amber },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' },
+      tooltip: { callbacks: { label: ctx => ` €${ctx.parsed.y.toLocaleString()}` } } },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, ticks: { callback: v => '€' + v.toLocaleString() }, grid: { color: '#edf5ec' } }
+    }
+  }
+});
+
+// ── COST STACKED BAR ──
+new Chart(document.getElementById('costStackedBar'), {
+  type: 'bar',
+  data: {
+    labels: months,
+    datasets: [
+      { label: 'Events',         data: [900,0,600,750],   backgroundColor: G.g700 },
+      { label: 'Operations',     data: [245,245,245,245], backgroundColor: G.g400 },
+      { label: 'Project Deliv.', data: [150,450,300,0],   backgroundColor: G.g200 },
+      { label: 'Legal',          data: [250,150,100,100], backgroundColor: G.amber },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' },
+      tooltip: { callbacks: { label: ctx => ` €${ctx.parsed.y.toLocaleString()}` } } },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, ticks: { callback: v => '€' + v.toLocaleString() }, grid: { color: '#edf5ec' } }
+    }
+  }
+});
+
+// ── KPI RADAR ──
+new Chart(document.getElementById('kpiRadar'), {
+  type: 'radar',
+  data: {
+    labels: ['Revenue','Cost Control','Net Surplus','Net Margin','Rev/Project','Conversion %','Cost/Member','Sponsorship','Legal Ratio'],
+    datasets: [{
+      label: 'Actual vs Target (%)',
+      data: [126, 132, 178, 150, 125, 107, 144, 169, 154],
+      borderColor: G.g700,
+      backgroundColor: G.g700 + '28',
+      pointBackgroundColor: G.g700,
+      borderWidth: 2, pointRadius: 5,
+    }, {
+      label: 'Target Baseline',
+      data: [100,100,100,100,100,100,100,100,100],
+      borderColor: G.amber,
+      backgroundColor: 'transparent',
+      borderDash: [5,5],
+      pointRadius: 0, borderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      r: {
+        min: 0, max: 200,
+        ticks: { stepSize: 50, callback: v => v + '%' },
+        grid: { color: '#d0e5cc' },
+        pointLabels: { font: { size: 11 } }
+      }
+    }
+  }
+});
+
+// ── P&L TABLE ──
+const plData = [
+  { label: 'REVENUE', isHeader: true },
+  { label: 'Membership Fees', vals: [1530,0,0,0], total: 1530, pct: 8.1, isRev: true },
+  { label: 'Standard Project Revenue', vals: [1750,3500,1750,0], total: 7000, pct: 37.0, isRev: true },
+  { label: 'Premium Project Revenue', vals: [0,4000,4000,0], total: 8000, pct: 42.3, isRev: true },
+  { label: 'Pro Bono Projects', vals: [0,0,0,0], total: 0, pct: 0, isRev: true },
+  { label: 'Sponsorships and Partnerships', vals: [1600,0,800,0], total: 2400, pct: 12.7, isRev: true },
+  { label: 'TOTAL REVENUE', vals: [4880,7500,6550,0], total: 18930, pct: 100, isTotalRev: true },
+  { label: 'COSTS', isHeader: true },
+  { label: 'Events Kick-off (Sep)', vals: [900,0,0,0], total: 900, pct: null },
+  { label: 'Events Networking (Nov)', vals: [0,0,600,0], total: 600, pct: null },
+  { label: 'Events Gala (Dec)', vals: [0,0,0,750], total: 750, pct: null },
+  { label: 'Ops Marketing & Comms', vals: [87.5,87.5,87.5,87.5], total: 350, pct: null },
+  { label: 'Ops Software & Tools', vals: [45,45,45,45], total: 180, pct: null },
+  { label: 'Ops Admin & Misc', vals: [50,50,50,50], total: 200, pct: null },
+  { label: 'Ops Training & Dev', vals: [62.5,62.5,62.5,62.5], total: 250, pct: null },
+  { label: 'Project Delivery Direct Costs', vals: [150,450,300,0], total: 900, pct: null },
+  { label: 'Legal Contract Reviews', vals: [50,150,100,0], total: 300, pct: null },
+  { label: 'Legal Liability Insurance', vals: [200,0,0,0], total: 200, pct: null },
+  { label: 'Legal Compliance Filing', vals: [0,0,0,100], total: 100, pct: null },
+  { label: 'TOTAL COSTS', vals: [1545,845,1245,1095], total: 4730, pct: null, isTotalCost: true },
+  { label: 'NET BALANCE', vals: [3335,6655,5305,-1095], total: 14200, pct: null, isNet: true },
+  { label: 'CUMULATIVE BALANCE', vals: [3335,9990,15295,14200], total: null, pct: null, isCum: true },
+];
+
+const plBody = document.getElementById('plBody');
+plData.forEach(row => {
+  const tr = document.createElement('tr');
+  if (row.isHeader) {
+    tr.innerHTML = `<td colspan="7" style="background:#e8f5e6;font-weight:700;font-size:0.71rem;text-transform:uppercase;letter-spacing:.6px;color:#245220;padding:9px 13px">${row.label}</td>`;
+  } else {
+    const fmtVal = v => v === 0 ? '\u2014' : (v < 0 ? `(€${Math.abs(v).toLocaleString()})` : `€${v.toLocaleString()}`);
+    const bgStyle = row.isTotalRev  ? 'background:#e8f5e6;font-weight:700' :
+                    row.isTotalCost ? 'background:#fef9ec;font-weight:700' :
+                    row.isNet       ? 'background:#e8f5e6;font-weight:700' :
+                    row.isCum       ? 'background:#f6faf5;font-weight:600;color:#5a7558' : '';
+    tr.setAttribute('style', bgStyle);
+    const negStyle = v => v < 0 ? 'color:#c0392b' : '';
+    tr.innerHTML = `
+      <td style="padding-left:${row.isTotalRev||row.isTotalCost||row.isNet||row.isCum?13:28}px">${row.label}</td>
+      ${row.vals.map(v => `<td style="${negStyle(v)}">${fmtVal(v)}</td>`).join('')}
+      <td style="font-weight:700;${negStyle(row.total)}">${row.total !== null ? fmtVal(row.total) : '\u2014'}</td>
+      <td>${row.pct !== null ? row.pct.toFixed(1) + '%' : '\u2014'}</td>
+    `;
+  }
+  plBody.appendChild(tr);
+});
+
+// ── LEGAL TABLE DATA ──
+const legalData = [
+  { id:'PRJ-001', partner:'TBC Client A', type:'Consulting Project', status:'Signed',      start:'01/09/2026', end:'30/10/2026', value:3000, risk:'Low',    action:'Final deliverable due 30/10',    owner:'Head of Finance' },
+  { id:'PRJ-002', partner:'TBC Client B', type:'Consulting Project', status:'Negotiation', start:'15/09/2026', end:'15/11/2026', value:5000, risk:'High',   action:'Finalise contract terms by 10/09', owner:'Head of Finance' },
+  { id:'PRJ-003', partner:'TBC Client C', type:'Consulting Project', status:'Signed',      start:'01/09/2026', end:'30/10/2026', value:1750, risk:'Low',    action:'Mid-point check-in due 01/10',   owner:'Project Lead' },
+  { id:'PRJ-004', partner:'TBC Client D', type:'Consulting Project', status:'Signed',      start:'01/10/2026', end:'30/11/2026', value:1750, risk:'Low',    action:'Kick-off meeting scheduled',     owner:'Project Lead' },
+  { id:'PRJ-005', partner:'TBC Client E', type:'Consulting Project', status:'Signed',      start:'01/10/2026', end:'30/11/2026', value:1750, risk:'Low',    action:'Scope confirmation due 05/10',   owner:'Project Lead' },
+  { id:'PRJ-006', partner:'TBC Client F', type:'Consulting Project', status:'Signed',      start:'01/11/2026', end:'31/12/2026', value:4000, risk:'Medium', action:'Ensure NDA covers subcontractors', owner:'Head of Finance' },
+  { id:'PRJ-007', partner:'Impact NGO 1',   type:'Pro Bono Project',   status:'Active',      start:'01/09/2026', end:'31/10/2026', value:0,    risk:'Low',    action:'No legal action required',       owner:'Project Lead' },
+  { id:'PRJ-008', partner:'Impact NGO 2',   type:'Pro Bono Project',   status:'Active',      start:'01/10/2026', end:'30/11/2026', value:0,    risk:'Low',    action:'No legal action required',       owner:'Project Lead' },
+  { id:'SPO-001', partner:'Corporate Sponsor A', type:'Sponsorship Agmt', status:'Signed',      start:'01/09/2026', end:'31/12/2026', value:800, risk:'Low',    action:'Send invoice by 05/09',          owner:'Head of Finance' },
+  { id:'SPO-002', partner:'Corporate Sponsor B', type:'Sponsorship Agmt', status:'Negotiation', start:'15/09/2026', end:'31/12/2026', value:800, risk:'Medium', action:'Remove exclusivity clause',       owner:'Head of Finance' },
+  { id:'SPO-003', partner:'Alumni Partner',       type:'Sponsorship Agmt', status:'Signed',      start:'01/11/2026', end:'31/12/2026', value:800, risk:'Low',    action:'Confirm mentorship schedule',    owner:'Head of Finance' },
+  { id:'INS-001', partner:'Insurer TBC',         type:'Liability Insurance', status:'Active',  start:'01/09/2026', end:'31/12/2026', value:200, risk:'Low',    action:'Confirm policy by 01/09',        owner:'Head of Finance' },
+  { id:'LEG-001', partner:'ESCP / Prefecture',   type:'Compliance Filing',   status:'Pending', start:'01/12/2026', end:'31/12/2026', value:100, risk:'Medium', action:'File before 31/12/2026',         owner:'Head of Finance' },
+];
+
+function renderLegal(data) {
+  const body = document.getElementById('legalBody');
+  body.innerHTML = '';
+  data.forEach(r => {
+    body.innerHTML += `
+      <tr>
+        <td style="font-weight:700;color:var(--g800)">${r.id}</td>
+        <td>${r.partner}</td>
+        <td style="font-size:0.76rem;color:var(--muted)">${r.type}</td>
+        <td><span class="badge badge-${r.status.toLowerCase().replace(' ','-')}">${r.status}</span></td>
+        <td style="font-size:0.76rem">${r.start}</td>
+        <td style="font-size:0.76rem">${r.end}</td>
+        <td style="font-weight:700">${r.value > 0 ? '€' + r.value.toLocaleString() : '\u2014'}</td>
+        <td><span class="badge badge-${r.risk.toLowerCase()}">${r.risk}</span></td>
+        <td style="font-size:0.75rem;color:var(--muted)">${r.action}</td>
+        <td style="font-size:0.76rem">${r.owner}</td>
+      </tr>`;
+  });
+}
+renderLegal(legalData);
+
+function filterLegal(filter, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (filter === 'all')       return renderLegal(legalData);
+  if (filter === 'risk-high') return renderLegal(legalData.filter(r => r.risk === 'High'));
+  renderLegal(legalData.filter(r => r.type.includes(filter)));
+}
+
+// ── LEGAL TYPE DONUT ──
+new Chart(document.getElementById('legalTypeChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Consulting Projects', 'Pro Bono Projects', 'Sponsorship Agmts', 'Insurance & Compliance'],
+    datasets: [{
+      data: [6, 2, 3, 2],
+      backgroundColor: [G.g900, G.g500, G.g300, G.amber],
+      borderWidth: 3, borderColor: '#fff', hoverOffset: 8,
+    }]
+  },
+  options: {
+    cutout: '60%', responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'right', labels: { padding: 12, usePointStyle: true } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.parsed} contracts` } }
+    }
+  }
+});
+
+// ── LEGAL RISK BAR ──
+new Chart(document.getElementById('legalRiskChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+    datasets: [{
+      data: [9, 3, 1],
+      backgroundColor: [G.g600, G.amber, G.red],
+      borderRadius: 6, borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x} contracts` } }
+    },
+    scales: {
+      x: { grid: { color: '#edf5ec' }, ticks: { stepSize: 1 } },
+      y: { grid: { display: false } }
+    }
+  }
+});
+</script>
+</body>
+</html>
